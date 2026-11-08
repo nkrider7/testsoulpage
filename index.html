@@ -169,7 +169,7 @@
   </g>
 </svg>
             </div>
-            <span class="text-xs font-semibold tracking-tight text-[var(--text-main)]">Soul Space</span>
+            
           </div>
         
 
@@ -188,6 +188,13 @@
       </div>
 
       <div class="flex items-center gap-1.5 shrink-0">
+        <!-- Page Width Toggle Button (Standard / Wide / Full) -->
+        <button id="page-width-btn" onclick="cyclePageWidth()" class="h-8 w-8 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-accent)] text-xs font-medium flex items-center justify-center transition-colors cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-main)]" title="Page width (Standard / Wide / Full)">
+          <span id="page-width-icon">
+            <i data-lucide="fold-horizontal" class="h-3.5 w-3.5"></i>
+          </span>
+        </button>
+
         <button onclick="toggleTheme()" class="h-8 w-8 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-accent)] text-xs font-medium flex items-center justify-center transition-colors cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-main)]" title="Toggle theme">
           <span class="theme-icon-container">
             <i data-lucide="moon" class="h-3.5 w-3.5"></i>
@@ -199,8 +206,8 @@
     <!-- Note Cover Image Banner -->
     
 
-    <!-- Document Content Container -->
-    <main class="max-w-4xl w-full mx-auto px-4 sm:px-12 py-6 sm:py-8 flex-1">
+    <!-- Document Content Container with dynamic width class -->
+    <main id="main-document-container" class="max-w-4xl w-full mx-auto px-4 sm:px-12 py-6 sm:py-8 flex-1 transition-[max-width] duration-200 ease-out">
       
       <!-- Floating Icon Overlapping Banner -->
       <div class="mt-2 mb-4 relative z-10">
@@ -434,7 +441,7 @@
   </g>
 </svg>
           </span>
-          <span>Soul Space</span>
+          
         </span>
         <span>on GitHub Pages</span>
       </div>
@@ -589,7 +596,55 @@
       });
     }
 
-    // 5. Code Block Copy
+    // 5. Page Width Toggle (Standard / Wide / Full)
+    const WIDTH_PRESETS = [
+      { id: 'standard', class: 'max-w-4xl', icon: 'fold-horizontal', title: 'Page width: Standard (Click for Wide)' },
+      { id: 'wide', class: 'max-w-6xl', icon: 'unfold-horizontal', title: 'Page width: Wide (Click for Full)' },
+      { id: 'full', class: 'max-w-none', icon: 'maximize-2', title: 'Page width: Full (Click for Standard)' }
+    ];
+
+    function applyPageWidth(presetId, save) {
+      const container = document.getElementById('main-document-container');
+      const iconSpan = document.getElementById('page-width-icon');
+      const btn = document.getElementById('page-width-btn');
+      const preset = WIDTH_PRESETS.find(p => p.id === presetId) || WIDTH_PRESETS[0];
+
+      if (container) {
+        container.classList.remove('max-w-4xl', 'max-w-6xl', 'max-w-none');
+        container.classList.add(preset.class);
+      }
+
+      if (btn) {
+        btn.setAttribute('title', preset.title);
+      }
+
+      if (iconSpan) {
+        iconSpan.innerHTML = '<i data-lucide="' + preset.icon + '" class="h-3.5 w-3.5"></i>';
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+      }
+
+      if (save) {
+        try {
+          localStorage.setItem('soulspace-page-width', preset.id);
+        } catch (_) {}
+      }
+    }
+
+    function cyclePageWidth() {
+      const current = localStorage.getItem('soulspace-page-width') || 'standard';
+      const currentIndex = WIDTH_PRESETS.findIndex(p => p.id === current);
+      const nextIndex = (currentIndex + 1) % WIDTH_PRESETS.length;
+      applyPageWidth(WIDTH_PRESETS[nextIndex].id, true);
+    }
+
+    try {
+      const savedWidth = localStorage.getItem('soulspace-page-width') || 'standard';
+      applyPageWidth(savedWidth, false);
+    } catch (_) {}
+
+    // 6. Code Block Copy
     function copyCode(btn) {
       const pre = btn.closest('.group')?.querySelector('pre code');
       if (!pre) return;
