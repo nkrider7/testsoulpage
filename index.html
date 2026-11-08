@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,10 +12,30 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 
+  <!-- Early theme boot script to completely eliminate theme flashing -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("soulspace.theme") || localStorage.getItem("soulspace-theme");
+        var cfgTheme = "dark";
+        var theme = saved || (cfgTheme !== "system" ? cfgTheme : "system");
+        var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var isDark = theme === "dark" || (theme === "system" && prefersDark);
+        if (isDark) {
+          document.documentElement.classList.add("dark");
+          document.documentElement.style.colorScheme = "dark";
+        } else {
+          document.documentElement.classList.remove("dark");
+          document.documentElement.style.colorScheme = "light";
+        }
+      } catch (_) {}
+    })();
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -24,7 +44,7 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', 'sans-serif'],
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace'],
           }
         }
@@ -45,24 +65,84 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
 
   <style>
-    body { font-family: 'Inter', sans-serif; text-rendering: optimizeLegibility; }
+    :root {
+      --bg-main: #faf9f5;
+      --bg-sidebar: #f5f4ee;
+      --bg-card: #ffffff;
+      --bg-muted: #f0eee6;
+      --bg-accent: #eae8df;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --border-subtle: rgba(0, 0, 0, 0.04);
+      --text-main: #191917;
+      --text-muted: #6f6e69;
+      --text-dim: #9b9a95;
+      --primary-color: #6366f1;
+    }
+
+    html.dark {
+      --bg-main: #151515;
+      --bg-sidebar: #181818;
+      --bg-card: #1f1f1f;
+      --bg-muted: #242424;
+      --bg-accent: #2a2a2a;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.04);
+      --text-main: #ededed;
+      --text-muted: #949494;
+      --text-dim: #666666;
+      --primary-color: #818cf8;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
     code, pre { font-family: 'JetBrains Mono', monospace; }
     pre[class*="language-"] { background: transparent !important; margin: 0 !important; padding: 0 !important; }
+
+    /* Custom scrollbars */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(150, 150, 150, 0.25) transparent;
+    }
+
+    /* Active TOC item highlight */
+    .active-toc {
+      background-color: rgba(99, 102, 241, 0.12) !important;
+      color: #6366f1 !important;
+      font-weight: 600 !important;
+    }
+    html.dark .active-toc {
+      color: #818cf8 !important;
+      background-color: rgba(129, 140, 248, 0.15) !important;
+    }
   </style>
 </head>
-<body class="bg-white text-zinc-900 dark:bg-[#0c0d12] dark:text-zinc-100 min-h-screen flex antialiased transition-colors duration-150 overflow-x-hidden font-sans relative">
+<body class="min-h-screen flex antialiased transition-colors duration-150 overflow-x-hidden font-sans relative">
+
+  <!-- Floating Corner Sidebar Open Button (When Sidebar Collapsed on Desktop) -->
+  
 
   <!-- Mobile Backdrop Overlay -->
-  <div id="sidebar-backdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 transition-opacity duration-200 hidden opacity-0 pointer-events-none md:hidden"></div>
+  
 
   <!-- Left Guest Sidebar: Slide-over Drawer on Mobile (<md), Sticky Column on Desktop (>=md) -->
-  <aside id="guest-sidebar" class="fixed md:sticky top-0 left-0 h-screen w-72 md:w-64 shrink-0 flex flex-col border-r border-zinc-200 dark:border-zinc-800/80 bg-zinc-50/98 dark:bg-[#111218]/98 select-none transition-transform duration-200 ease-in-out z-50 md:z-30 -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none">
+  
+
+  <!-- Main Canvas Area -->
+  <div class="flex-1 flex flex-col min-w-0 min-h-screen overflow-y-auto w-full">
     
-    <!-- Top Brand Header with SoulSpace Ghost Planet Logo & Pages Badge -->
-    <div class="flex h-12 shrink-0 items-center justify-between border-b border-zinc-200 dark:border-zinc-800/80 px-3.5 bg-zinc-50/50 dark:bg-zinc-900/30">
-      <div class="flex items-center gap-2 min-w-0">
-        <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-zinc-950 p-1 shadow-2xs border border-zinc-800">
-          <svg class="h-4 w-4" viewBox="0 0 512 512" fill="none" role="img" aria-label="SoulSpace Logo">
+    <!-- Top Sticky Header Bar (Exact Image 1 Public Page Match) -->
+    <header class="sticky top-0 z-20 border-b border-[var(--border-color)] bg-[var(--bg-main)]/85 backdrop-blur-md px-3 sm:px-6 h-12 flex items-center justify-between gap-2 select-none">
+      <div class="flex items-center gap-2 min-w-0 flex-1">
+        
+          <div class="flex items-center gap-2">
+            <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-zinc-950 p-1 border border-zinc-800">
+              <svg class="h-4 w-4" viewBox="0 0 512 512" fill="none" role="img" aria-label="SoulSpace Logo">
   <defs>
     <linearGradient id="ghost-ring" x1="-201" y1="0" x2="201" y2="0" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#2563EB" />
@@ -88,146 +168,28 @@
     <path fill="#FFFFFF" d="M 373.2 112.5 C 375.2 132.8, 381.4 139.0, 401.7 143.9 C 381.4 148.8, 375.2 155.0, 373.2 175.3 C 371.2 155.0, 365.0 148.8, 344.7 143.9 C 365.0 139.0, 371.2 132.8, 373.2 112.5 Z" />
   </g>
 </svg>
-        </div>
-        <span class="text-xs font-semibold tracking-tight text-zinc-800 dark:text-zinc-200 truncate">
-          Soul Space
-        </span>
-        <span class="rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 px-1.5 py-0.5 text-[10px] font-medium tracking-wide">
-          Pages
-        </span>
-      </div>
-      <button onclick="toggleSidebar()" class="h-7 w-7 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-200/60 dark:hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer" title="Collapse sidebar">
-        <i data-lucide="chevrons-left" class="h-4 w-4"></i>
-      </button>
-    </div>
-
-    
-
-    <!-- Currently Viewing Card -->
-    <div class="p-3 border-b border-zinc-200 dark:border-zinc-800/60">
-      <div class="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5">
-        CURRENTLY VIEWING
-      </div>
-      <div class="flex items-start gap-2.5 rounded-lg bg-white dark:bg-zinc-800/40 p-2.5 border border-zinc-200 dark:border-zinc-700/50 shadow-2xs">
-        <div class="text-base shrink-0 mt-0.5">
-          <img src="https://res.cloudinary.com/heaa0mxa/image/upload/v1793376623/onepiece-17.webp" class="h-5 w-5 rounded object-cover" />
-        </div>
-        <div class="min-w-0 flex-1">
-          <div class="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">Boa Hancock</div>
-          <div class="text-[10px] text-zinc-500">Page Document</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Table of Contents -->
-    <div class="flex-1 overflow-y-auto px-2 py-3 space-y-1">
-      <div class="px-2 text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">
-        TABLE OF CONTENTS
-      </div>
-      
-        <button onclick="scrollToHeading('heading-0-the-world-of-one-piece-a-journey-to-become-the-pirate-king')" class="w-full text-left rounded-md px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-colors truncate flex items-center gap-1.5 cursor-pointer font-medium">
-          <i data-lucide="hash" class="h-3 w-3 opacity-50 shrink-0"></i>
-          <span class="truncate">🌊 The World of One Piece: A Journey to Become the Pirate King</span>
-        </button>
-      
-        <button onclick="scrollToHeading('heading-3-1-building-a-world-of-adventure')" class="w-full text-left rounded-md px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-colors truncate flex items-center gap-1.5 cursor-pointer pl-4">
-          <i data-lucide="hash" class="h-3 w-3 opacity-50 shrink-0"></i>
-          <span class="truncate">🏴‍☠️ 1. Building a World of Adventure</span>
-        </button>
-      
-        <button onclick="scrollToHeading('heading-5-the-seven-great-regions')" class="w-full text-left rounded-md px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-colors truncate flex items-center gap-1.5 cursor-pointer pl-6">
-          <i data-lucide="hash" class="h-3 w-3 opacity-50 shrink-0"></i>
-          <span class="truncate">🌍 The Seven Great Regions</span>
-        </button>
-      
-        <button onclick="scrollToHeading('heading-15-legendary-character-boa-hancock')" class="w-full text-left rounded-md px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-colors truncate flex items-center gap-1.5 cursor-pointer pl-4">
-          <i data-lucide="hash" class="h-3 w-3 opacity-50 shrink-0"></i>
-          <span class="truncate">👑  Legendary Character: Boa Hancock</span>
-        </button>
-      
-        <button onclick="scrollToHeading('heading-18-character-profile')" class="w-full text-left rounded-md px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-colors truncate flex items-center gap-1.5 cursor-pointer pl-6">
-          <i data-lucide="hash" class="h-3 w-3 opacity-50 shrink-0"></i>
-          <span class="truncate">💜 Character Profile</span>
-        </button>
-      
-        <button onclick="scrollToHeading('heading-20-her-legendary-powers')" class="w-full text-left rounded-md px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-colors truncate flex items-center gap-1.5 cursor-pointer pl-6">
-          <i data-lucide="hash" class="h-3 w-3 opacity-50 shrink-0"></i>
-          <span class="truncate">💎 Her Legendary Powers</span>
-        </button>
-      
-        <button onclick="scrollToHeading('heading-31-why-she-is-so-powerful')" class="w-full text-left rounded-md px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-colors truncate flex items-center gap-1.5 cursor-pointer pl-6">
-          <i data-lucide="hash" class="h-3 w-3 opacity-50 shrink-0"></i>
-          <span class="truncate">🌹 Why She Is So Powerful</span>
-        </button>
-      
-        <button onclick="scrollToHeading('heading-38-3-an-original-story-the-forgotten-empress')" class="w-full text-left rounded-md px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-colors truncate flex items-center gap-1.5 cursor-pointer pl-4">
-          <i data-lucide="hash" class="h-3 w-3 opacity-50 shrink-0"></i>
-          <span class="truncate">📖 3. An Original Story: The Forgotten Empress</span>
-        </button>
-      
-        <button onclick="scrollToHeading('heading-52-4-character-power-system')" class="w-full text-left rounded-md px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-colors truncate flex items-center gap-1.5 cursor-pointer pl-4">
-          <i data-lucide="hash" class="h-3 w-3 opacity-50 shrink-0"></i>
-          <span class="truncate">⚔️ 4. Character Power System</span>
-        </button>
-      
-        <button onclick="scrollToHeading('heading-55-character-progression')" class="w-full text-left rounded-md px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-colors truncate flex items-center gap-1.5 cursor-pointer pl-6">
-          <i data-lucide="hash" class="h-3 w-3 opacity-50 shrink-0"></i>
-          <span class="truncate">Character Progression</span>
-        </button>
-      
-        <button onclick="scrollToHeading('heading-62-5-my-world-building-checklist')" class="w-full text-left rounded-md px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-colors truncate flex items-center gap-1.5 cursor-pointer pl-4">
-          <i data-lucide="hash" class="h-3 w-3 opacity-50 shrink-0"></i>
-          <span class="truncate">🎯 5. My World-Building Checklist</span>
-        </button>
-      
-        <button onclick="scrollToHeading('heading-73-final-thoughts')" class="w-full text-left rounded-md px-2 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 transition-colors truncate flex items-center gap-1.5 cursor-pointer pl-4">
-          <i data-lucide="hash" class="h-3 w-3 opacity-50 shrink-0"></i>
-          <span class="truncate">✨ Final Thoughts</span>
-        </button>
-      
-
-      
-    </div>
-
-    <!-- Bottom Guest Status & Theme Toggle -->
-    <div class="shrink-0 border-t border-zinc-200 dark:border-zinc-800/80 p-3 bg-zinc-100/60 dark:bg-zinc-900/40 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <div class="h-6 w-6 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 flex items-center justify-center text-xs">
-          <i data-lucide="user" class="h-3.5 w-3.5"></i>
-        </div>
-        <div class="flex flex-col">
-          <span class="text-xs font-medium text-zinc-800 dark:text-zinc-200">Guest</span>
-          <span class="text-[10px] text-zinc-500">Read-only mode</span>
-        </div>
-      </div>
-      <button onclick="toggleTheme()" class="h-8 w-8 rounded-md border border-zinc-300 dark:border-zinc-700/80 hover:bg-zinc-200 dark:hover:bg-zinc-800 flex items-center justify-center text-xs transition-colors cursor-pointer" title="Toggle theme">
-        <span id="sidebar-theme-icon">
-          <i data-lucide="moon" class="h-4 w-4 text-zinc-600 dark:text-zinc-300"></i>
-        </span>
-      </button>
-    </div>
-  </aside>
-
-  <!-- Main Canvas Area: Takes 100% full width on mobile devices -->
-  <div class="flex-1 flex flex-col min-w-0 min-h-screen overflow-y-auto w-full">
-    
-    <!-- Top Sticky Header Bar -->
-    <header class="sticky top-0 z-20 border-b border-zinc-200 dark:border-zinc-800/80 bg-white/80 dark:bg-[#0c0d12]/80 backdrop-blur-md px-3 sm:px-6 h-12 flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2 min-w-0 flex-1">
-        <button id="sidebar-toggle-btn" onclick="toggleSidebar()" class="h-8 w-8 shrink-0 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer text-zinc-600 dark:text-zinc-400" title="Toggle sidebar">
-          <i data-lucide="panel-left-open" class="h-4 w-4"></i>
-        </button>
+            </div>
+            <span class="text-xs font-semibold tracking-tight text-[var(--text-main)]">Soul Space</span>
+          </div>
+        
 
         
 
-        <span class="text-xs font-semibold text-zinc-900 dark:text-zinc-100 truncate">Boa Hancock</span>
-        <span class="text-zinc-400 dark:text-zinc-600 text-xs shrink-0 hidden sm:inline">•</span>
-        <span class="text-[10px] text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded shrink-0 hidden sm:inline">Pages</span>
+        <div class="flex items-center gap-1.5 min-w-0 truncate">
+          <div class="h-4 w-4 shrink-0 flex items-center justify-center text-xs">
+            <img src="https://res.cloudinary.com/heaa0mxa/image/upload/v1793376623/onepiece-17.webp" class="h-3.5 w-3.5 rounded-xs object-cover" />
+          </div>
+          <span class="text-xs font-semibold text-[var(--text-main)] truncate">Boa Hancock</span>
+        </div>
+
+        <span class="rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 px-1.5 py-0.5 text-[10px] font-medium tracking-wide shrink-0 hidden sm:inline">
+          Pages
+        </span>
       </div>
 
       <div class="flex items-center gap-1.5 shrink-0">
-        <button onclick="toggleTheme()" class="h-8 w-8 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-xs font-medium flex items-center justify-center transition-colors cursor-pointer text-zinc-700 dark:text-zinc-300" title="Toggle theme">
-          <span id="nav-theme-icon">
+        <button onclick="toggleTheme()" class="h-8 w-8 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] hover:bg-[var(--bg-accent)] text-xs font-medium flex items-center justify-center transition-colors cursor-pointer text-[var(--text-muted)] hover:text-[var(--text-main)]" title="Toggle theme">
+          <span class="theme-icon-container">
             <i data-lucide="moon" class="h-3.5 w-3.5"></i>
           </span>
         </button>
@@ -242,48 +204,46 @@
       
       <!-- Floating Icon Overlapping Banner -->
       <div class="mt-2 mb-4 relative z-10">
-        <div class="h-14 w-14 sm:h-20 sm:w-20 rounded-2xl bg-white dark:bg-[#111218] border-2 border-zinc-200 dark:border-zinc-800 shadow-xl flex items-center justify-center text-2xl sm:text-4xl overflow-hidden select-none">
+        <div class="h-14 w-14 sm:h-20 sm:w-20 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-xl flex items-center justify-center text-2xl sm:text-4xl overflow-hidden select-none">
           <img src="https://res.cloudinary.com/heaa0mxa/image/upload/v1793376623/onepiece-17.webp" class="w-full h-full object-cover" />
         </div>
       </div>
 
       <!-- Title & Metadata -->
-      <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white mb-3">
+      <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[var(--text-main)] mb-3">
         Boa Hancock
       </h1>
       
-      <div class="flex flex-wrap items-center gap-2 pb-6 text-xs text-zinc-500 dark:text-zinc-400 border-b border-zinc-200 dark:border-zinc-800 mb-8">
-        <span class="flex items-center gap-1"><i data-lucide="clock" class="h-3.5 w-3.5"></i> 3 min read</span>
-        <span>•</span>
-        <span>498 words</span>
-        <span>•</span>
-        <span>Published with SoulSpace</span>
-      </div>
+      
+        <div class="border-b border-[var(--border-color)] mb-8"></div>
+      
 
       <!-- Article Body -->
-      <article class="space-y-2 text-zinc-800 dark:text-zinc-200 text-sm sm:text-base leading-relaxed">
-        <h1 id="heading-0-the-world-of-one-piece-a-journey-to-become-the-pirate-king" class="text-2xl sm:text-3xl font-bold mt-8 mb-4 tracking-tight text-zinc-900 dark:text-zinc-100 group flex items-center gap-2">
+      <article class="space-y-2 text-[var(--text-main)] text-sm sm:text-base leading-relaxed">
+        <h1 id="heading-0-the-world-of-one-piece-a-journey-to-become-the-pirate-king" class="text-2xl sm:text-3xl font-bold mt-8 mb-4 tracking-tight text-[var(--text-main)] group flex items-center gap-2">
           <span>🌊 The World of One Piece: A Journey to Become the Pirate King</span>
-          <a href="#heading-0-the-world-of-one-piece-a-journey-to-become-the-pirate-king" class="opacity-0 group-hover:opacity-60 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 text-sm no-underline" aria-label="Permalink">
+          <a href="#heading-0-the-world-of-one-piece-a-journey-to-become-the-pirate-king" class="opacity-0 group-hover:opacity-60 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm no-underline transition-opacity" aria-label="Permalink">
             <i data-lucide="hash" class="h-4 w-4 inline"></i>
           </a>
         </h1>
-<p class="leading-relaxed my-2 text-zinc-700 dark:text-zinc-300">&quot;The world is full of possibilities. All you need is the courage to explore them.&quot; ✨</p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">Welcome to a world where dreams have no limits, oceans hide countless mysteries, and powerful warriors shape the destiny of entire kingdoms.</p>
-<h2 id="heading-3-1-building-a-world-of-adventure" class="text-xl sm:text-2xl font-bold mt-7 mb-3 tracking-tight text-zinc-900 dark:text-zinc-100 group flex items-center gap-2">
+<blockquote class="border-l-4 border-indigo-500/60 pl-4 py-1.5 my-4 italic text-[var(--text-muted)] bg-indigo-500/5 rounded-r-lg">
+          <p class="leading-relaxed">&quot;The world is full of possibilities. All you need is the courage to explore them.&quot; ✨</p>
+        </blockquote>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">Welcome to a world where dreams have no limits, oceans hide countless mysteries, and powerful warriors shape the destiny of entire kingdoms.</p>
+<h2 id="heading-3-1-building-a-world-of-adventure" class="text-xl sm:text-2xl font-bold mt-7 mb-3 tracking-tight text-[var(--text-main)] group flex items-center gap-2">
           <span>🏴‍☠️ 1. Building a World of Adventure</span>
-          <a href="#heading-3-1-building-a-world-of-adventure" class="opacity-0 group-hover:opacity-60 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 text-sm no-underline" aria-label="Permalink">
+          <a href="#heading-3-1-building-a-world-of-adventure" class="opacity-0 group-hover:opacity-60 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm no-underline transition-opacity" aria-label="Permalink">
             <i data-lucide="hash" class="h-4 w-4 inline"></i>
           </a>
         </h2>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">Imagine creating your own anime-inspired universe, filled with mysterious islands, legendary kingdoms, dangerous oceans, and unforgettable characters.</p>
-<h3 id="heading-5-the-seven-great-regions" class="text-lg sm:text-xl font-semibold mt-6 mb-2 tracking-tight text-zinc-900 dark:text-zinc-100 group flex items-center gap-2">
+<p class="leading-relaxed my-3 text-[var(--text-main)]">Imagine creating your own anime-inspired universe, filled with mysterious islands, legendary kingdoms, dangerous oceans, and unforgettable characters.</p>
+<h3 id="heading-5-the-seven-great-regions" class="text-lg sm:text-xl font-semibold mt-6 mb-2 tracking-tight text-[var(--text-main)] group flex items-center gap-2">
           <span>🌍 The Seven Great Regions</span>
-          <a href="#heading-5-the-seven-great-regions" class="opacity-0 group-hover:opacity-60 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 text-sm no-underline" aria-label="Permalink">
+          <a href="#heading-5-the-seven-great-regions" class="opacity-0 group-hover:opacity-60 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm no-underline transition-opacity" aria-label="Permalink">
             <i data-lucide="hash" class="h-4 w-4 inline"></i>
           </a>
         </h3>
-<ul class="list-disc pl-6 space-y-1.5 my-3 text-zinc-700 dark:text-zinc-300">
+<ul class="list-disc pl-6 space-y-1.5 my-3 text-[var(--text-main)]">
 <li>🌋 <strong>Ember Island</strong> – A volcanic kingdom protected by ancient warriors.</li>
 <li>❄️ <strong>Frost Kingdom</strong> – A frozen civilization hiding forgotten secrets.</li>
 <li>🌸 <strong>Sakura Valley</strong> – A peaceful land of cherry blossoms and samurai.</li>
@@ -292,156 +252,192 @@
 <li>☁️ <strong>Sky Kingdom</strong> – A civilization floating above the clouds.</li>
 <li>💎 <strong>Crystal Empire</strong> – A wealthy kingdom powered by magical energy.</li>
 </ul>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">Every region has its own culture, history, powers, and legendary heroes.</p>
-<hr class="my-6 border-zinc-200 dark:border-zinc-800" />
-<h2 id="heading-15-legendary-character-boa-hancock" class="text-xl sm:text-2xl font-bold mt-7 mb-3 tracking-tight text-zinc-900 dark:text-zinc-100 group flex items-center gap-2">
+<p class="leading-relaxed my-3 text-[var(--text-main)]">Every region has its own culture, history, powers, and legendary heroes.</p>
+<hr class="my-6 border-[var(--border-color)]" />
+<h2 id="heading-15-legendary-character-boa-hancock" class="text-xl sm:text-2xl font-bold mt-7 mb-3 tracking-tight text-[var(--text-main)] group flex items-center gap-2">
           <span>👑  Legendary Character: Boa Hancock</span>
-          <a href="#heading-15-legendary-character-boa-hancock" class="opacity-0 group-hover:opacity-60 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 text-sm no-underline" aria-label="Permalink">
+          <a href="#heading-15-legendary-character-boa-hancock" class="opacity-0 group-hover:opacity-60 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm no-underline transition-opacity" aria-label="Permalink">
             <i data-lucide="hash" class="h-4 w-4 inline"></i>
           </a>
         </h2>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300"><em>Beauty, confidence, elegance, and overwhelming power.</em></p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300"><strong>Boa Hancock</strong> is one of the most fascinating characters in the One Piece universe.</p>
-<h3 id="heading-18-character-profile" class="text-lg sm:text-xl font-semibold mt-6 mb-2 tracking-tight text-zinc-900 dark:text-zinc-100 group flex items-center gap-2">
+<p class="leading-relaxed my-3 text-[var(--text-main)]"><em>Beauty, confidence, elegance, and overwhelming power.</em></p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]"><strong>Boa Hancock</strong> is one of the most fascinating characters in the One Piece universe.</p>
+<h3 id="heading-18-character-profile" class="text-lg sm:text-xl font-semibold mt-6 mb-2 tracking-tight text-[var(--text-main)] group flex items-center gap-2">
           <span>💜 Character Profile</span>
-          <a href="#heading-18-character-profile" class="opacity-0 group-hover:opacity-60 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 text-sm no-underline" aria-label="Permalink">
+          <a href="#heading-18-character-profile" class="opacity-0 group-hover:opacity-60 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm no-underline transition-opacity" aria-label="Permalink">
             <i data-lucide="hash" class="h-4 w-4 inline"></i>
           </a>
         </h3>
-<h3 id="heading-20-her-legendary-powers" class="text-lg sm:text-xl font-semibold mt-6 mb-2 tracking-tight text-zinc-900 dark:text-zinc-100 group flex items-center gap-2">
+<h3 id="heading-20-her-legendary-powers" class="text-lg sm:text-xl font-semibold mt-6 mb-2 tracking-tight text-[var(--text-main)] group flex items-center gap-2">
           <span>💎 Her Legendary Powers</span>
-          <a href="#heading-20-her-legendary-powers" class="opacity-0 group-hover:opacity-60 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 text-sm no-underline" aria-label="Permalink">
+          <a href="#heading-20-her-legendary-powers" class="opacity-0 group-hover:opacity-60 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm no-underline transition-opacity" aria-label="Permalink">
             <i data-lucide="hash" class="h-4 w-4 inline"></i>
           </a>
         </h3>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300"><strong>1. Mero Mero no Mi</strong></p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">Her Devil Fruit allows her to turn targets into stone through the power of attraction.</p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300"><strong>2. Perfume Femur</strong></p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">A powerful kick that can petrify whatever it touches.</p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300"><strong>3. Slave Arrow</strong></p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">She creates a heart-shaped projectile that can petrify opponents.</p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300"><strong>4. Haki Mastery</strong></p>
-<ul class="list-disc pl-6 space-y-1.5 my-3 text-zinc-700 dark:text-zinc-300">
+<p class="leading-relaxed my-3 text-[var(--text-main)]"><strong>1. Mero Mero no Mi</strong></p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">Her Devil Fruit allows her to turn targets into stone through the power of attraction.</p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]"><strong>2. Perfume Femur</strong></p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">A powerful kick that can petrify whatever it touches.</p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]"><strong>3. Slave Arrow</strong></p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">She creates a heart-shaped projectile that can petrify opponents.</p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]"><strong>4. Haki Mastery</strong></p>
+<ul class="list-disc pl-6 space-y-1.5 my-3 text-[var(--text-main)]">
 <li>⚡ Conqueror&#039;s Haki</li>
 <li>🛡️ Armament Haki</li>
 <li>👁️ Observation Haki</li>
 </ul>
-<h3 id="heading-31-why-she-is-so-powerful" class="text-lg sm:text-xl font-semibold mt-6 mb-2 tracking-tight text-zinc-900 dark:text-zinc-100 group flex items-center gap-2">
+<h3 id="heading-31-why-she-is-so-powerful" class="text-lg sm:text-xl font-semibold mt-6 mb-2 tracking-tight text-[var(--text-main)] group flex items-center gap-2">
           <span>🌹 Why She Is So Powerful</span>
-          <a href="#heading-31-why-she-is-so-powerful" class="opacity-0 group-hover:opacity-60 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 text-sm no-underline" aria-label="Permalink">
+          <a href="#heading-31-why-she-is-so-powerful" class="opacity-0 group-hover:opacity-60 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm no-underline transition-opacity" aria-label="Permalink">
             <i data-lucide="hash" class="h-4 w-4 inline"></i>
           </a>
         </h3>
-<ul class="list-disc pl-6 space-y-1.5 my-3 text-zinc-700 dark:text-zinc-300">
+<ul class="list-disc pl-6 space-y-1.5 my-3 text-[var(--text-main)]">
 <li>Exceptional combat abilities.</li>
 <li>Incredible speed and agility.</li>
 <li>Mastery of multiple Haki types.</li>
 <li>A powerful Devil Fruit.</li>
 <li>Strong leadership and confidence.</li>
 </ul>
-<hr class="my-6 border-zinc-200 dark:border-zinc-800" />
-<h2 id="heading-38-3-an-original-story-the-forgotten-empress" class="text-xl sm:text-2xl font-bold mt-7 mb-3 tracking-tight text-zinc-900 dark:text-zinc-100 group flex items-center gap-2">
+<hr class="my-6 border-[var(--border-color)]" />
+<h2 id="heading-38-3-an-original-story-the-forgotten-empress" class="text-xl sm:text-2xl font-bold mt-7 mb-3 tracking-tight text-[var(--text-main)] group flex items-center gap-2">
           <span>📖 3. An Original Story: The Forgotten Empress</span>
-          <a href="#heading-38-3-an-original-story-the-forgotten-empress" class="opacity-0 group-hover:opacity-60 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 text-sm no-underline" aria-label="Permalink">
+          <a href="#heading-38-3-an-original-story-the-forgotten-empress" class="opacity-0 group-hover:opacity-60 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm no-underline transition-opacity" aria-label="Permalink">
             <i data-lucide="hash" class="h-4 w-4 inline"></i>
           </a>
         </h2>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300"><em>Chapter 01 – The Island Beyond the Horizon</em></p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">The moon illuminated the endless ocean. Somewhere beyond the Grand Blue, an island appeared that was missing from every map.</p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">A mysterious energy surrounded its mountains.</p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">At the center of the island stood an ancient palace.</p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">A young explorer named Akira discovered a forgotten stone tablet containing a message:</p>
-<p class="leading-relaxed my-2 text-zinc-700 dark:text-zinc-300">&quot;When the seven seas become one, the forgotten power shall awaken.&quot;</p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">But Akira wasn&#039;t alone.</p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">A powerful warrior watched him from the shadows.</p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">🌸 It was Boa Hancock.</p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300"><strong>&quot;You dare enter this sacred land without permission?&quot;</strong></p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">Akira slowly turned around.</p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">His adventure had just begun.</p>
-<hr class="my-6 border-zinc-200 dark:border-zinc-800" />
-<h2 id="heading-52-4-character-power-system" class="text-xl sm:text-2xl font-bold mt-7 mb-3 tracking-tight text-zinc-900 dark:text-zinc-100 group flex items-center gap-2">
+<p class="leading-relaxed my-3 text-[var(--text-main)]"><em>Chapter 01 – The Island Beyond the Horizon</em></p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">The moon illuminated the endless ocean. Somewhere beyond the Grand Blue, an island appeared that was missing from every map.</p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">A mysterious energy surrounded its mountains.</p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">At the center of the island stood an ancient palace.</p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">A young explorer named Akira discovered a forgotten stone tablet containing a message:</p>
+<blockquote class="border-l-4 border-indigo-500/60 pl-4 py-1.5 my-4 italic text-[var(--text-muted)] bg-indigo-500/5 rounded-r-lg">
+          <p class="leading-relaxed">&quot;When the seven seas become one, the forgotten power shall awaken.&quot;</p>
+        </blockquote>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">But Akira wasn&#039;t alone.</p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">A powerful warrior watched him from the shadows.</p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">🌸 It was Boa Hancock.</p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]"><strong>&quot;You dare enter this sacred land without permission?&quot;</strong></p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">Akira slowly turned around.</p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">His adventure had just begun.</p>
+<hr class="my-6 border-[var(--border-color)]" />
+<h2 id="heading-52-4-character-power-system" class="text-xl sm:text-2xl font-bold mt-7 mb-3 tracking-tight text-[var(--text-main)] group flex items-center gap-2">
           <span>⚔️ 4. Character Power System</span>
-          <a href="#heading-52-4-character-power-system" class="opacity-0 group-hover:opacity-60 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 text-sm no-underline" aria-label="Permalink">
+          <a href="#heading-52-4-character-power-system" class="opacity-0 group-hover:opacity-60 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm no-underline transition-opacity" aria-label="Permalink">
             <i data-lucide="hash" class="h-4 w-4 inline"></i>
           </a>
         </h2>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">Every character in this universe has unique abilities and a personal growth journey.</p>
-<h3 id="heading-55-character-progression" class="text-lg sm:text-xl font-semibold mt-6 mb-2 tracking-tight text-zinc-900 dark:text-zinc-100 group flex items-center gap-2">
+<p class="leading-relaxed my-3 text-[var(--text-main)]">Every character in this universe has unique abilities and a personal growth journey.</p>
+<h3 id="heading-55-character-progression" class="text-lg sm:text-xl font-semibold mt-6 mb-2 tracking-tight text-[var(--text-main)] group flex items-center gap-2">
           <span>Character Progression</span>
-          <a href="#heading-55-character-progression" class="opacity-0 group-hover:opacity-60 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 text-sm no-underline" aria-label="Permalink">
+          <a href="#heading-55-character-progression" class="opacity-0 group-hover:opacity-60 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm no-underline transition-opacity" aria-label="Permalink">
             <i data-lucide="hash" class="h-4 w-4 inline"></i>
           </a>
         </h3>
-<ol class="list-decimal pl-6 space-y-1.5 my-3 text-zinc-700 dark:text-zinc-300">
+<ol class="list-decimal pl-6 space-y-1.5 my-3 text-[var(--text-main)]">
 <li>🌱 Beginner – Discover your abilities.</li>
 <li>⚔️ Warrior – Master basic combat.</li>
 <li>🔥 Elite – Unlock advanced techniques.</li>
 <li>👑 Legend – Become a world-class fighter.</li>
 <li>🌌 Mythical – Transcend ordinary limitations.</li>
 </ol>
-<hr class="my-6 border-zinc-200 dark:border-zinc-800" />
-<h2 id="heading-62-5-my-world-building-checklist" class="text-xl sm:text-2xl font-bold mt-7 mb-3 tracking-tight text-zinc-900 dark:text-zinc-100 group flex items-center gap-2">
+<hr class="my-6 border-[var(--border-color)]" />
+<h2 id="heading-62-5-my-world-building-checklist" class="text-xl sm:text-2xl font-bold mt-7 mb-3 tracking-tight text-[var(--text-main)] group flex items-center gap-2">
           <span>🎯 5. My World-Building Checklist</span>
-          <a href="#heading-62-5-my-world-building-checklist" class="opacity-0 group-hover:opacity-60 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 text-sm no-underline" aria-label="Permalink">
+          <a href="#heading-62-5-my-world-building-checklist" class="opacity-0 group-hover:opacity-60 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm no-underline transition-opacity" aria-label="Permalink">
             <i data-lucide="hash" class="h-4 w-4 inline"></i>
           </a>
         </h2>
-<div class="flex items-start gap-2.5 my-1.5 text-zinc-800 dark:text-zinc-300 text-sm">
-          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-indigo-600" />
+<div class="flex items-start gap-2.5 my-1.5 text-[var(--text-main)] text-sm">
+          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-[var(--border-color)] bg-[var(--bg-card)] text-indigo-600" />
           <span class="">Design the world map.</span>
         </div>
-<div class="flex items-start gap-2.5 my-1.5 text-zinc-800 dark:text-zinc-300 text-sm">
-          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-indigo-600" />
+<div class="flex items-start gap-2.5 my-1.5 text-[var(--text-main)] text-sm">
+          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-[var(--border-color)] bg-[var(--bg-card)] text-indigo-600" />
           <span class="">Create seven unique kingdoms.</span>
         </div>
-<div class="flex items-start gap-2.5 my-1.5 text-zinc-800 dark:text-zinc-300 text-sm">
-          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-indigo-600" />
+<div class="flex items-start gap-2.5 my-1.5 text-[var(--text-main)] text-sm">
+          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-[var(--border-color)] bg-[var(--bg-card)] text-indigo-600" />
           <span class="">Develop the main protagonist.</span>
         </div>
-<div class="flex items-start gap-2.5 my-1.5 text-zinc-800 dark:text-zinc-300 text-sm">
-          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-indigo-600" />
+<div class="flex items-start gap-2.5 my-1.5 text-[var(--text-main)] text-sm">
+          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-[var(--border-color)] bg-[var(--bg-card)] text-indigo-600" />
           <span class="">Design legendary characters.</span>
         </div>
-<div class="flex items-start gap-2.5 my-1.5 text-zinc-800 dark:text-zinc-300 text-sm">
-          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-indigo-600" />
+<div class="flex items-start gap-2.5 my-1.5 text-[var(--text-main)] text-sm">
+          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-[var(--border-color)] bg-[var(--bg-card)] text-indigo-600" />
           <span class="">Create a unique power system.</span>
         </div>
-<div class="flex items-start gap-2.5 my-1.5 text-zinc-800 dark:text-zinc-300 text-sm">
-          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-indigo-600" />
+<div class="flex items-start gap-2.5 my-1.5 text-[var(--text-main)] text-sm">
+          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-[var(--border-color)] bg-[var(--bg-card)] text-indigo-600" />
           <span class="">Write the history of the ancient world.</span>
         </div>
-<div class="flex items-start gap-2.5 my-1.5 text-zinc-800 dark:text-zinc-300 text-sm">
-          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-indigo-600" />
+<div class="flex items-start gap-2.5 my-1.5 text-[var(--text-main)] text-sm">
+          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-[var(--border-color)] bg-[var(--bg-card)] text-indigo-600" />
           <span class="">Develop the main villain.</span>
         </div>
-<div class="flex items-start gap-2.5 my-1.5 text-zinc-800 dark:text-zinc-300 text-sm">
-          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-indigo-600" />
+<div class="flex items-start gap-2.5 my-1.5 text-[var(--text-main)] text-sm">
+          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-[var(--border-color)] bg-[var(--bg-card)] text-indigo-600" />
           <span class="">Connect characters through meaningful stories.</span>
         </div>
-<div class="flex items-start gap-2.5 my-1.5 text-zinc-800 dark:text-zinc-300 text-sm">
-          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-indigo-600" />
+<div class="flex items-start gap-2.5 my-1.5 text-[var(--text-main)] text-sm">
+          <input type="checkbox" disabled  class="mt-1 h-4 w-4 rounded border-[var(--border-color)] bg-[var(--bg-card)] text-indigo-600" />
           <span class="">Create the first major adventure arc.</span>
         </div>
-<hr class="my-6 border-zinc-200 dark:border-zinc-800" />
-<h2 id="heading-73-final-thoughts" class="text-xl sm:text-2xl font-bold mt-7 mb-3 tracking-tight text-zinc-900 dark:text-zinc-100 group flex items-center gap-2">
+<hr class="my-6 border-[var(--border-color)]" />
+<h2 id="heading-73-final-thoughts" class="text-xl sm:text-2xl font-bold mt-7 mb-3 tracking-tight text-[var(--text-main)] group flex items-center gap-2">
           <span>✨ Final Thoughts</span>
-          <a href="#heading-73-final-thoughts" class="opacity-0 group-hover:opacity-60 text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 text-sm no-underline" aria-label="Permalink">
+          <a href="#heading-73-final-thoughts" class="opacity-0 group-hover:opacity-60 text-[var(--text-muted)] hover:text-[var(--text-main)] text-sm no-underline transition-opacity" aria-label="Permalink">
             <i data-lucide="hash" class="h-4 w-4 inline"></i>
           </a>
         </h2>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">A great fictional world isn&#039;t built only through powerful characters. It&#039;s built through meaningful stories, unforgettable adventures, mysterious locations, and characters with dreams worth fighting for.</p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300"><strong>Your imagination is the only limit.</strong></p>
-<p class="leading-relaxed my-3 text-zinc-700 dark:text-zinc-300">🌊 <em>Set sail. Discover the unknown. Create your legend.</em></p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">A great fictional world isn&#039;t built only through powerful characters. It&#039;s built through meaningful stories, unforgettable adventures, mysterious locations, and characters with dreams worth fighting for.</p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]"><strong>Your imagination is the only limit.</strong></p>
+<p class="leading-relaxed my-3 text-[var(--text-main)]">🌊 <em>Set sail. Discover the unknown. Create your legend.</em></p>
 
       </article>
 
-      <!-- Main Database Viewport (Only rendered if document is a database note) -->
-      <div id="database-viewport" class="mt-10"></div>
+      <!-- Main Database Viewport (Rendered when document is a database note) -->
+      <div id="database-viewport" class="mt-8"></div>
     </main>
 
     <!-- Footer -->
-    <footer class="mt-20 border-t border-zinc-200 dark:border-zinc-800/80 py-8 text-center text-xs text-zinc-500">
-      Published with <a href="https://github.com" target="_blank" rel="noreferrer" class="font-medium text-zinc-600 dark:text-zinc-400 hover:underline">SoulSpace</a> on GitHub Pages
+    <footer class="mt-20 border-t border-[var(--border-color)] py-8 text-center text-xs text-[var(--text-muted)] select-none">
+      <div class="flex items-center justify-center gap-2">
+        <span>Published with</span>
+        <span class="inline-flex items-center gap-1.5 font-semibold text-[var(--text-main)]">
+          <span class="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-zinc-950 p-0.5 border border-zinc-800">
+            <svg class="h-4 w-4" viewBox="0 0 512 512" fill="none" role="img" aria-label="SoulSpace Logo">
+  <defs>
+    <linearGradient id="ghost-ring" x1="-201" y1="0" x2="201" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2563EB" />
+      <stop offset="35%" stop-color="#4F46E5" />
+      <stop offset="70%" stop-color="#7C3AED" />
+      <stop offset="100%" stop-color="#C026D3" />
+    </linearGradient>
+    <path id="ghost-ring-shape" fill-rule="evenodd" d="M -201 0 A 201 55.5 0 1 0 201 0 A 201 55.5 0 1 0 -201 0 Z M -164 -5.5 A 163.5 35.5 0 1 1 163 -5.5 A 163.5 35.5 0 1 1 -164 -5.5 Z" />
+    <clipPath id="ghost-ring-clip">
+      <rect x="-145" y="10" width="290" height="90" />
+    </clipPath>
+  </defs>
+  <g transform="translate(256 258) scale(1.14) translate(-256 -258)">
+    <g transform="translate(257.5 266) rotate(-15.6)">
+      <use href="#ghost-ring-shape" fill="url(#ghost-ring)" />
+    </g>
+    <path fill="#FFFFFF" d="M 244.5 126.5 C 305.5 119.5, 353.5 162.0, 360.5 223.0 L 376.2 332.5 C 378.8 352.5, 365.5 367.2, 347.5 368.8 C 332.2 370.2, 319.8 359.5, 312.8 349.0 C 309.5 344.2, 305.2 344.8, 303.2 350.0 C 297.2 365.8, 282.5 380.2, 263.0 382.0 C 243.5 383.8, 227.5 371.5, 220.2 358.0 C 217.5 353.0, 213.2 353.5, 210.8 358.8 C 204.8 372.0, 193.5 385.0, 177.5 386.5 C 159.5 388.2, 148.2 373.8, 146.5 354.0 L 139.2 248.5 C 134.5 186.5, 183.5 133.5, 244.5 126.5 Z" />
+    <circle cx="205.8" cy="239.1" r="28.6" fill="#090514" />
+    <circle cx="295.4" cy="227.8" r="28.6" fill="#090514" />
+    <g transform="translate(257.5 266) rotate(-15.6)" clip-path="url(#ghost-ring-clip)">
+      <use href="#ghost-ring-shape" fill="url(#ghost-ring)" />
+    </g>
+    <path fill="#FFFFFF" d="M 373.2 112.5 C 375.2 132.8, 381.4 139.0, 401.7 143.9 C 381.4 148.8, 375.2 155.0, 373.2 175.3 C 371.2 155.0, 365.0 148.8, 344.7 143.9 C 365.0 139.0, 371.2 132.8, 373.2 112.5 Z" />
+  </g>
+</svg>
+          </span>
+          <span>Soul Space</span>
+        </span>
+        <span>on GitHub Pages</span>
+      </div>
     </footer>
   </div>
 
@@ -451,13 +447,14 @@
       lucide.createIcons();
     }
 
-    // 1. Mobile-friendly Sidebar Drawer Toggle
+    // 1. Responsive Sidebar Drawer Toggle
     let sidebarOpenMobile = false;
     let sidebarOpenDesktop = true;
 
     function toggleSidebar() {
       const sidebar = document.getElementById('guest-sidebar');
       const backdrop = document.getElementById('sidebar-backdrop');
+      const floatBtn = document.getElementById('floating-sidebar-btn');
       if (!sidebar) return;
 
       const isMobile = window.innerWidth < 768;
@@ -491,8 +488,16 @@
         sidebarOpenDesktop = !sidebarOpenDesktop;
         if (sidebarOpenDesktop) {
           sidebar.classList.remove('md:hidden');
+          if (floatBtn) {
+            floatBtn.classList.remove('md:opacity-100', 'md:pointer-events-auto');
+            floatBtn.classList.add('md:opacity-0', 'md:pointer-events-none');
+          }
         } else {
           sidebar.classList.add('md:hidden');
+          if (floatBtn) {
+            floatBtn.classList.remove('md:opacity-0', 'md:pointer-events-none');
+            floatBtn.classList.add('md:opacity-100', 'md:pointer-events-auto');
+          }
         }
       }
     }
@@ -512,32 +517,79 @@
       }
     }
 
-    // 3. Theme Toggle
+    // 3. Table of Contents ScrollSpy
+    function initScrollSpy() {
+      const headings = document.querySelectorAll('article h1[id], article h2[id], article h3[id]');
+      if (!headings.length) return;
+      const tocButtons = document.querySelectorAll('[data-toc-id]');
+      if (!tocButtons.length) return;
+
+      function updateActive() {
+        let activeId = null;
+        const scrollY = window.scrollY || window.pageYOffset;
+        headings.forEach(h => {
+          const top = h.getBoundingClientRect().top + scrollY - 120;
+          if (scrollY >= top) {
+            activeId = h.id;
+          }
+        });
+        if (!activeId && headings.length) {
+          activeId = headings[0].id;
+        }
+        tocButtons.forEach(btn => {
+          const id = btn.getAttribute('data-toc-id');
+          if (id === activeId) {
+            btn.classList.add('active-toc');
+          } else {
+            btn.classList.remove('active-toc');
+          }
+        });
+      }
+
+      window.addEventListener('scroll', updateActive, { passive: true });
+      updateActive();
+    }
+    initScrollSpy();
+
+    // 4. System Theme & Manual Toggle
+    function updateThemeIcons(isDark) {
+      const iconName = isDark ? 'sun' : 'moon';
+      document.querySelectorAll('.theme-icon-container').forEach(el => {
+        el.innerHTML = '<i data-lucide="' + iconName + '" class="h-4 w-4"></i>';
+      });
+      if (window.lucide) lucide.createIcons();
+    }
+
     function toggleTheme() {
       const isDark = document.documentElement.classList.toggle('dark');
+      document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+      localStorage.setItem('soulspace.theme', isDark ? 'dark' : 'light');
       localStorage.setItem('soulspace-theme', isDark ? 'dark' : 'light');
       updateThemeIcons(isDark);
     }
 
-    function updateThemeIcons(isDark) {
-      const sIcon = document.getElementById('sidebar-theme-icon');
-      const nIcon = document.getElementById('nav-theme-icon');
-      const iconName = isDark ? 'moon' : 'sun';
-      if (sIcon) sIcon.innerHTML = '<i data-lucide="' + iconName + '" class="h-4 w-4"></i>';
-      if (nIcon) nIcon.innerHTML = '<i data-lucide="' + iconName + '" class="h-3.5 w-3.5"></i>';
-      if (window.lucide) lucide.createIcons();
+    // Set initial icon based on current DOM class
+    updateThemeIcons(document.documentElement.classList.contains('dark'));
+
+    // Listen to OS theme changes if user hasn't explicitly set a preference
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+        const saved = localStorage.getItem('soulspace.theme') || localStorage.getItem('soulspace-theme');
+        if (!saved || saved === 'system') {
+          if (e.matches) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+            updateThemeIcons(true);
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.style.colorScheme = 'light';
+            updateThemeIcons(false);
+          }
+        }
+      });
     }
 
-    const savedTheme = localStorage.getItem('soulspace-theme');
-    if (savedTheme === 'light') {
-      document.documentElement.classList.remove('dark');
-      updateThemeIcons(false);
-    } else if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      updateThemeIcons(true);
-    }
-
-    // 4. Code Block Copy
+    // 5. Code Block Copy
     function copyCode(btn) {
       const pre = btn.closest('.group')?.querySelector('pre code');
       if (!pre) return;
@@ -551,12 +603,13 @@
       });
     }
 
-    // 5. Database Renderer with full UUID-to-Option badge styling
+    // 6. Interactive Database Engine (Notion / SoulSpace Quality)
     const allDatabases = {};
+    const isInteractiveDb = true;
 
     const COLOR_MAP = {
       gray: {
-        badge: 'bg-zinc-100 text-zinc-700 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700',
+        badge: 'bg-zinc-500/10 text-zinc-700 dark:text-zinc-300 border-zinc-500/20',
         dot: '#71717a'
       },
       blue: {
@@ -593,6 +646,22 @@
       }
     };
 
+    const PROP_ICONS = {
+      title: 'type',
+      text: 'type',
+      status: 'circle-dot',
+      select: 'list',
+      multi_select: 'list',
+      date: 'calendar',
+      url: 'link-2',
+      number: 'hash',
+      checkbox: 'check-square',
+      email: 'mail',
+      phone: 'phone',
+      file: 'paperclip',
+      formula: 'calculator'
+    };
+
     function renderSingleDatabase(targetContainer, db) {
       if (!targetContainer || !db || !db.properties || !db.rows) return;
 
@@ -607,15 +676,13 @@
 
       function formatCellValue(prop, val) {
         if (val === null || val === undefined || val === '') {
-          return '<span class="text-zinc-400 dark:text-zinc-600">—</span>';
+          return '<span class="text-[var(--text-dim)]">—</span>';
         }
 
-        // Title property
         if (prop.type === 'title' || prop.id === 'title') {
-          return '<span class="font-medium text-zinc-900 dark:text-zinc-100">' + String(val) + '</span>';
+          return '<span class="font-medium text-[var(--text-main)]">' + escapeHtml(String(val)) + '</span>';
         }
 
-        // Status property
         if (prop.type === 'status') {
           const opt = getOptionConfig(prop, val);
           const colorKey = opt?.color || 'gray';
@@ -624,11 +691,10 @@
 
           return '<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium border ' + cfg.badge + '">' +
             '<span class="h-1.5 w-1.5 rounded-full shrink-0" style="background-color: ' + cfg.dot + '"></span>' +
-            '<span>' + label + '</span>' +
+            '<span>' + escapeHtml(label) + '</span>' +
           '</span>';
         }
 
-        // Select property
         if (prop.type === 'select') {
           const opt = getOptionConfig(prop, val);
           const colorKey = opt?.color || 'blue';
@@ -636,11 +702,10 @@
           const label = opt ? opt.name : String(val);
 
           return '<span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ' + cfg.badge + '">' +
-            '<span>' + label + '</span>' +
+            '<span>' + escapeHtml(label) + '</span>' +
           '</span>';
         }
 
-        // Multi-select property
         if (prop.type === 'multi_select') {
           const arr = Array.isArray(val) ? val : [val];
           return '<div class="flex flex-wrap gap-1">' + arr.map(item => {
@@ -648,27 +713,31 @@
             const colorKey = opt?.color || 'purple';
             const cfg = COLOR_MAP[colorKey] || COLOR_MAP.purple;
             const label = opt ? opt.name : String(item);
-            return '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium border ' + cfg.badge + '">' + label + '</span>';
+            return '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium border ' + cfg.badge + '">' + escapeHtml(label) + '</span>';
           }).join('') + '</div>';
         }
 
-        // Date property
         if (prop.type === 'date') {
-          return '<span class="text-zinc-600 dark:text-zinc-300 font-mono text-[11px]">' + String(val) + '</span>';
+          return '<span class="text-[var(--text-muted)] font-mono text-[11px] flex items-center gap-1"><i data-lucide="calendar" class="h-3 w-3 opacity-60"></i> ' + escapeHtml(String(val)) + '</span>';
         }
 
-        // URL property
         if (prop.type === 'url') {
-          return '<a href="' + String(val) + '" target="_blank" rel="noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline truncate max-w-xs block">' + String(val) + '</a>';
+          return '<a href="' + escapeHtml(String(val)) + '" target="_blank" rel="noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline truncate max-w-xs block flex items-center gap-1"><span>' + escapeHtml(String(val)) + '</span><i data-lucide="external-link" class="h-3 w-3 opacity-60"></i></a>';
         }
 
-        // Checkbox property
         if (prop.type === 'checkbox') {
           const checked = Boolean(val);
-          return checked ? '<span class="text-emerald-500 font-bold">✓</span>' : '<span class="text-zinc-400">✕</span>';
+          return checked
+            ? '<span class="inline-flex items-center justify-center h-4 w-4 rounded bg-indigo-600 text-white text-[10px]">✓</span>'
+            : '<span class="inline-flex items-center justify-center h-4 w-4 rounded border border-[var(--border-color)] text-[var(--text-dim)] text-[10px]"></span>';
         }
 
-        return '<span class="text-zinc-700 dark:text-zinc-300">' + (typeof val === 'object' ? JSON.stringify(val) : String(val)) + '</span>';
+        if (prop.type === 'number') {
+          const n = Number(val);
+          return '<span class="font-mono text-xs text-[var(--text-main)]">' + (isNaN(n) ? escapeHtml(String(val)) : n.toLocaleString()) + '</span>';
+        }
+
+        return '<span class="text-[var(--text-main)]">' + escapeHtml(typeof val === 'object' ? JSON.stringify(val) : String(val)) + '</span>';
       }
 
       function draw() {
@@ -679,37 +748,43 @@
           return JSON.stringify(r.values || {}).toLowerCase().includes(lower);
         });
 
-        let h = '<div class="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#121319] overflow-hidden shadow-sm">';
+        let h = '<div class="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] overflow-hidden shadow-xs my-6">';
         
         // Header
-        h += '<div class="p-3 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#161720] flex items-center justify-between gap-3 flex-wrap">';
+        h += '<div class="p-3 border-b border-[var(--border-color)] bg-[var(--bg-muted)]/40 flex items-center justify-between gap-3 flex-wrap">';
         h += '<div class="flex items-center gap-2">';
-        h += '<i data-lucide="database" class="h-4 w-4 text-indigo-500"></i>';
-        h += '<span class="text-xs font-semibold text-zinc-900 dark:text-zinc-100">' + (db.title || 'Database') + '</span>';
-        h += '<span class="text-[10px] text-zinc-500 font-mono">(' + rows.length + ')</span>';
+        h += '<div class="h-6 w-6 rounded-md bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 flex items-center justify-center">';
+        h += '<i data-lucide="database" class="h-3.5 w-3.5"></i>';
+        h += '</div>';
+        h += '<span class="text-xs font-semibold text-[var(--text-main)]">' + escapeHtml(db.title || 'Database') + '</span>';
+        h += '<span class="text-[10px] text-[var(--text-muted)] font-mono bg-[var(--bg-card)] border border-[var(--border-color)] px-1.5 py-0.5 rounded-full">' + rows.length + ' records</span>';
         h += '</div>';
 
-        h += '<div class="flex items-center gap-2">';
-        h += '<div class="relative">';
-        h += '<input id="db-search-' + db.id + '" value="' + search + '" placeholder="Search database..." class="text-xs pl-7 pr-2.5 py-1 rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-indigo-500 w-36 sm:w-48" />';
-        h += '<i data-lucide="search" class="h-3.5 w-3.5 text-zinc-400 absolute left-2 top-2"></i>';
-        h += '</div>';
+        if (isInteractiveDb) {
+          h += '<div class="flex items-center gap-2">';
+          h += '<div class="relative">';
+          h += '<input id="db-search-' + db.id + '" value="' + escapeHtml(search) + '" placeholder="Search database..." class="text-xs pl-7 pr-2.5 py-1 rounded-lg border border-[var(--border-color)] bg-[var(--bg-card)] text-[var(--text-main)] placeholder-[var(--text-dim)] focus:outline-none focus:ring-1 focus:ring-indigo-500 w-36 sm:w-48" />';
+          h += '<i data-lucide="search" class="h-3.5 w-3.5 text-[var(--text-dim)] absolute left-2 top-2"></i>';
+          h += '</div>';
 
-        h += '<div class="flex rounded-md border border-zinc-200 dark:border-zinc-700 overflow-hidden text-[11px] bg-zinc-100 dark:bg-zinc-800/80 p-0.5">';
-        h += '<button id="btn-gallery-' + db.id + '" class="px-2.5 py-1 rounded flex items-center gap-1 cursor-pointer transition-colors ' + (currentView === 'gallery' ? 'bg-white dark:bg-zinc-700 font-semibold text-zinc-900 dark:text-white shadow-2xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200') + '"><i data-lucide="layout-grid" class="h-3 w-3"></i> Gallery</button>';
-        h += '<button id="btn-table-' + db.id + '" class="px-2.5 py-1 rounded flex items-center gap-1 cursor-pointer transition-colors ' + (currentView === 'table' ? 'bg-white dark:bg-zinc-700 font-semibold text-zinc-900 dark:text-white shadow-2xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200') + '"><i data-lucide="table" class="h-3 w-3"></i> Table</button>';
-        h += '</div></div></div>';
+          h += '<div class="flex rounded-lg border border-[var(--border-color)] overflow-hidden text-[11px] bg-[var(--bg-card)] p-0.5 shadow-2xs">';
+          h += '<button id="btn-table-' + db.id + '" class="px-2.5 py-1 rounded-md flex items-center gap-1 cursor-pointer transition-colors ' + (currentView === 'table' ? 'bg-[var(--bg-accent)] font-semibold text-[var(--text-main)] shadow-2xs' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]') + '"><i data-lucide="table" class="h-3 w-3"></i> Table</button>';
+          h += '<button id="btn-gallery-' + db.id + '" class="px-2.5 py-1 rounded-md flex items-center gap-1 cursor-pointer transition-colors ' + (currentView === 'gallery' ? 'bg-[var(--bg-accent)] font-semibold text-[var(--text-main)] shadow-2xs' : 'text-[var(--text-muted)] hover:text-[var(--text-main)]') + '"><i data-lucide="layout-grid" class="h-3 w-3"></i> Gallery</button>';
+          h += '</div></div>';
+        }
+        h += '</div>';
 
         if (currentView === 'gallery') {
           h += '<div class="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">';
           rows.forEach(r => {
-            h += '<div class="p-3.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#181922] shadow-2xs hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors space-y-2">';
+            h += '<div class="p-3.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] shadow-xs hover:border-indigo-500/40 transition-colors space-y-2.5">';
             (db.properties || []).forEach((p, idx) => {
               const val = r.values?.[p.id];
+              const propIcon = PROP_ICONS[p.type] || 'circle';
               if (idx === 0) {
-                h += '<div class="font-semibold text-xs text-zinc-900 dark:text-zinc-100 truncate flex items-center gap-1.5"><i data-lucide="file-text" class="h-3.5 w-3.5 text-zinc-400 shrink-0"></i> <span>' + (r.title || val || 'Untitled') + '</span></div>';
+                h += '<div class="font-semibold text-xs text-[var(--text-main)] truncate flex items-center gap-1.5"><i data-lucide="file-text" class="h-3.5 w-3.5 text-[var(--text-muted)] shrink-0"></i> <span>' + escapeHtml(r.title || val || 'Untitled') + '</span></div>';
               } else if (val !== undefined && val !== null && val !== '') {
-                h += '<div class="text-[11px] flex items-center justify-between gap-2"><span class="text-zinc-400 shrink-0">' + p.name + ':</span><span class="truncate">' + formatCellValue(p, val) + '</span></div>';
+                h += '<div class="text-[11px] flex items-center justify-between gap-2 border-t border-[var(--border-subtle)] pt-1.5"><span class="text-[var(--text-muted)] flex items-center gap-1 shrink-0"><i data-lucide="' + propIcon + '" class="h-3 w-3 opacity-60"></i>' + escapeHtml(p.name) + ':</span><span class="truncate">' + formatCellValue(p, val) + '</span></div>';
               }
             });
             h += '</div>';
@@ -717,20 +792,31 @@
           h += '</div>';
         } else {
           h += '<div class="overflow-x-auto"><table class="w-full text-left text-xs border-collapse">';
-          h += '<thead class="bg-zinc-50 dark:bg-zinc-800/60 text-zinc-500 dark:text-zinc-400 uppercase font-semibold border-b border-zinc-200 dark:border-zinc-800"><tr>';
+          h += '<thead class="bg-[var(--bg-muted)]/30 text-[var(--text-muted)] border-b border-[var(--border-color)]"><tr>';
           (db.properties || []).forEach(p => {
-            h += '<th class="px-4 py-2.5 tracking-wider text-[11px]">' + p.name + '</th>';
+            const propIcon = PROP_ICONS[p.type] || 'circle';
+            h += '<th class="px-3.5 py-2.5 font-medium tracking-wide text-[11px] border-r border-[var(--border-subtle)] last:border-r-0 whitespace-nowrap"><div class="flex items-center gap-1.5"><i data-lucide="' + propIcon + '" class="h-3.5 w-3.5 opacity-60"></i><span>' + escapeHtml(p.name) + '</span></div></th>';
           });
-          h += '</tr></thead><tbody class="divide-y divide-zinc-200 dark:divide-zinc-800/60">';
+          h += '</tr></thead><tbody class="divide-y divide-[var(--border-color)]">';
           rows.forEach(r => {
-            h += '<tr class="hover:bg-zinc-50/80 dark:hover:bg-zinc-800/20 transition-colors">';
+            h += '<tr class="hover:bg-[var(--bg-accent)]/30 transition-colors">';
             (db.properties || []).forEach(p => {
               const val = r.values?.[p.id];
-              h += '<td class="px-4 py-2.5 align-middle">' + formatCellValue(p, val) + '</td>';
+              h += '<td class="px-3.5 py-2.5 align-middle border-r border-[var(--border-subtle)] last:border-r-0">' + formatCellValue(p, val) + '</td>';
             });
             h += '</tr>';
           });
-          h += '</tbody></table></div>';
+          h += '</tbody>';
+          h += '<tfoot class="border-t border-[var(--border-color)] bg-[var(--bg-muted)]/20 text-[var(--text-muted)] text-[11px] font-mono"><tr>';
+          (db.properties || []).forEach((p, idx) => {
+            if (idx === 0) {
+              h += '<td class="px-3.5 py-2 border-r border-[var(--border-subtle)]">Count ' + rows.length + '</td>';
+            } else {
+              h += '<td class="px-3.5 py-2 border-r border-[var(--border-subtle)]"></td>';
+            }
+          });
+          h += '</tr></tfoot>';
+          h += '</table></div>';
         }
 
         h += '</div>';
@@ -767,6 +853,19 @@
       const defaultRoot = document.getElementById('database-viewport');
       if (isFullPageDb && defaultRoot && !document.getElementById('db-view-' + dbKeys[0])) {
         renderSingleDatabase(defaultRoot, allDatabases[dbKeys[0]]);
+      }
+
+      // Populate sidebar records if full-page database note
+      if (isFullPageDb) {
+        const sidebarRecs = document.getElementById('sidebar-db-records');
+        if (sidebarRecs && allDatabases[dbKeys[0]]) {
+          const rootDb = allDatabases[dbKeys[0]];
+          const recHtml = (rootDb.rows || []).map(r => {
+            return '<div class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-accent)] transition-colors truncate cursor-pointer"><i data-lucide="file-text" class="h-3.5 w-3.5 opacity-60 shrink-0"></i><span class="truncate">' + escapeHtml(r.title || 'Untitled') + '</span></div>';
+          }).join('');
+          sidebarRecs.innerHTML = recHtml;
+          if (window.lucide) lucide.createIcons();
+        }
       }
     }
   </script>
